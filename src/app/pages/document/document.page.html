@@ -1,0 +1,106 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/" text="" />
+    </ion-buttons>
+    <ion-title>{{ doc()?.title ?? '' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (doc(); as d) {
+    <div class="hero">
+      <app-wallet-card [doc]="d" [folder]="folder()" (click)="open()" />
+    </div>
+
+    @if (kind() === 'image') {
+      <div class="preview" (click)="open()">
+        @if (preview()) {
+          <img [src]="preview()" [alt]="d.title" />
+        } @else if (previewLoading()) {
+          <ion-spinner name="crescent" />
+        }
+      </div>
+    }
+
+    <div class="quick">
+      <button type="button" (click)="open()"><ion-icon name="open-outline" /><span>Abrir</span></button>
+      <button type="button" (click)="sendFile()"><ion-icon name="share-outline" /><span>Enviar</span></button>
+      <button type="button" (click)="shareDrive()"><ion-icon name="people-outline" /><span>Compartilhar</span></button>
+    </div>
+
+    <ion-list inset>
+      <ion-item button (click)="rename()">
+        <ion-label>Nome</ion-label>
+        <ion-note slot="end">{{ d.title }}</ion-note>
+      </ion-item>
+      <ion-item button (click)="move()">
+        <ion-label>Pasta</ion-label>
+        <ion-note slot="end">
+          @if (folder(); as f) {
+            <span class="dot" [style.background]="f.color"></span>{{ f.name }}
+          } @else {
+            Sem pasta
+          }
+        </ion-note>
+      </ion-item>
+      <ion-item button (click)="editTags()">
+        <ion-label>
+          Tags
+          @if (d.tags.length) {
+            <div class="chips">
+              @for (t of d.tags; track t) {
+                <ion-chip class="tag-chip">#{{ t }}</ion-chip>
+              }
+            </div>
+          } @else {
+            <p>Toque para adicionar</p>
+          }
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <ion-list inset>
+      <ion-item>
+        <ion-label>Tipo</ion-label>
+        <ion-note slot="end">{{ kindLabel() }}</ion-note>
+      </ion-item>
+      @if (size()) {
+        <ion-item>
+          <ion-label>Tamanho</ion-label>
+          <ion-note slot="end">{{ size() }}</ion-note>
+        </ion-item>
+      }
+      <ion-item>
+        <ion-label>Arquivo no Drive</ion-label>
+        <ion-note slot="end" class="ellipsis">{{ d.fileName }}</ion-note>
+      </ion-item>
+      <ion-item>
+        <ion-label>Adicionado</ion-label>
+        <ion-note slot="end">{{ d.createdTime | date: 'dd/MM/yyyy HH:mm' }}</ion-note>
+      </ion-item>
+      @if (d.webViewLink) {
+        <ion-item button detail="false" (click)="openInDrive()">
+          <ion-icon slot="start" name="logo-google" />
+          <ion-label>Abrir no Google Drive</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+
+    <ion-list inset>
+      <ion-item button detail="false" (click)="remove()">
+        <ion-icon slot="start" name="trash-outline" color="danger" />
+        <ion-label color="danger">Remover documento</ion-label>
+      </ion-item>
+    </ion-list>
+  } @else {
+    <div class="center">
+      @if (store.loading()) {
+        <ion-spinner name="crescent" />
+      } @else {
+        <p class="muted">Documento não encontrado.</p>
+        <ion-button fill="outline" (click)="store.refresh()">Sincronizar</ion-button>
+      }
+    </div>
+  }
+</ion-content>

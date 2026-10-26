@@ -1,0 +1,157 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    @if (selecting()) {
+      <ion-buttons slot="start">
+        <ion-button (click)="selectAll()">Todos</ion-button>
+      </ion-buttons>
+      <ion-title>{{ selected().size }} selecionado(s)</ion-title>
+      <ion-buttons slot="end">
+        <ion-button strong (click)="stopSelecting()">Concluir</ion-button>
+      </ion-buttons>
+    } @else {
+      <ion-title>MyDocs</ion-title>
+      <ion-buttons slot="end">
+        @if (store.loading()) {
+          <ion-spinner name="crescent" class="sync" />
+        }
+        <ion-button (click)="startSelecting()" [disabled]="!store.docs().length">Selecionar</ion-button>
+        <ion-button routerLink="/settings" aria-label="Ajustes">
+          <ion-icon slot="icon-only" name="settings-outline" />
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content />
+  </ion-refresher>
+
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">{{ selecting() ? 'Selecionar' : 'MyDocs' }}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="filters">
+    <ion-searchbar
+      placeholder="Buscar documentos, pastas, tags"
+      [value]="query()"
+      (ionInput)="query.set($any($event).detail.value ?? '')"
+      [debounce]="150"
+    />
+
+    @if (store.folders().length) {
+      <div class="scroller">
+        <ion-chip [outline]="folderFilter() !== null" (click)="folderFilter.set(null)">
+          <ion-label>Todas</ion-label>
+        </ion-chip>
+        @for (f of store.folders(); track f.id) {
+          <ion-chip [outline]="folderFilter() !== f.id" (click)="folderFilter.set(folderFilter() === f.id ? null : f.id)">
+            <span class="dot" [style.background]="f.color"></span>
+            <ion-label>{{ f.name }}</ion-label>
+          </ion-chip>
+        }
+      </div>
+    }
+
+    @if (store.allTags().length) {
+      <div class="scroller">
+        @for (t of store.allTags(); track t) {
+          <ion-chip class="tag-chip" [color]="hasTag(t) ? 'primary' : undefined" [outline]="!hasTag(t)" (click)="toggleTag(t)">
+            <ion-label>#{{ t }}</ion-label>
+          </ion-chip>
+        }
+      </div>
+    }
+  </div>
+
+  @if (store.error() && !store.docs().length) {
+    <div class="empty">
+      <ion-icon name="cloud-upload-outline" />
+      <p>Não foi possível sincronizar com o Drive.</p>
+      <p class="muted small">{{ store.error() }}</p>
+      <ion-button fill="outline" (click)="store.refresh()">Tentar de novo</ion-button>
+    </div>
+  }
+
+  @for (s of sections(); track s.folder?.id ?? 'all') {
+    <section class="stack-section">
+      @if (s.folder) {
+        <h2>
+          <span class="dot" [style.background]="s.folder.color"></span>
+          {{ s.folder.name }}
+          <span class="muted count">{{ s.docs.length }}</span>
+        </h2>
+      }
+      <div class="stack" [style.--peek.px]="peek(s.docs.length)">
+        @for (d of s.docs; track d.id; let last = $last; let i = $index) {
+          <app-wallet-card
+            class="stack-item"
+            [class.last]="last"
+            [doc]="d"
+            [folder]="store.folderById().get(d.folderId)"
+            [shade]="(i % 3) * 7"
+            [selecting]="selecting()"
+            [selected]="selected().has(d.id)"
+            (pointerdown)="pointerDown($event, d)"
+            (pointermove)="pointerMove($event)"
+            (pointerup)="pointerUp()"
+            (pointercancel)="pointerUp()"
+            (contextmenu)="$event.preventDefault()"
+            (click)="tap(d)"
+          />
+        }
+      </div>
+    </section>
+  } @empty {
+    @if (!store.loading() && !store.error()) {
+      <div class="empty">
+        <ion-icon name="wallet-outline" />
+        @if (store.docs().length) {
+          <p>Nenhum documento com esses filtros.</p>
+          <ion-button fill="outline" (click)="clearFilters()">Limpar filtros</ion-button>
+        } @else {
+          <p><b>Sua carteira está vazia.</b></p>
+          <p class="muted small">
+            Abra um PDF, foto ou planilha em qualquer app, toque em <b>Compartilhar</b> e escolha <b>MyDocs</b>. Ou toque
+            no <b>+</b> abaixo.
+          </p>
+        }
+      </div>
+    }
+  }
+
+  <div class="bottom-space"></div>
+
+  @if (!selecting()) {
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button (click)="fileInput.click()" aria-label="Adicionar documento">
+        <ion-icon name="add" />
+      </ion-fab-button>
+    </ion-fab>
+  }
+  <input #fileInput type="file" multiple hidden (change)="pickFiles(fileInput)" />
+</ion-content>
+
+@if (selecting()) {
+  <ion-footer>
+    <ion-toolbar>
+      <div class="actions">
+        <ion-button fill="clear" (click)="shareSelected()" [disabled]="!selected().size">
+          <div class="action"><ion-icon name="share-outline" /><span>Enviar</span></div>
+        </ion-button>
+        <ion-button fill="clear" (click)="moveSelected()" [disabled]="!selected().size">
+          <div class="action"><ion-icon name="folder-open-outline" /><span>Mover</span></div>
+        </ion-button>
+        <ion-button fill="clear" (click)="retagSelected()" [disabled]="!selected().size">
+          <div class="action"><ion-icon name="pricetags-outline" /><span>Tags</span></div>
+        </ion-button>
+        <ion-button fill="clear" color="danger" (click)="deleteSelected()" [disabled]="!selected().size">
+          <div class="action"><ion-icon name="trash-outline" /><span>Remover</span></div>
+        </ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+}

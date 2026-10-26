@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()" [disabled]="saving()">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Arquivar</ion-title>
+    <ion-buttons slot="end">
+      <ion-button strong (click)="save()" [disabled]="!canSave()">Salvar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  @if (saving()) {
+    <ion-progress-bar [value]="progress()" [buffer]="progress() + 0.15" />
+  }
+</ion-header>
+
+<ion-content>
+  <ion-list inset>
+    <ion-list-header>{{ drafts().length === 1 ? 'Documento' : drafts().length + ' documentos' }}</ion-list-header>
+    @for (d of drafts(); track d.file.uri; let i = $index) {
+      <ion-item>
+        <ion-thumbnail slot="start">
+          @if (d.preview) {
+            <img [src]="d.preview" alt="" />
+          } @else {
+            <div class="file-icon"><ion-icon [name]="d.icon" /></div>
+          }
+        </ion-thumbnail>
+        <ion-input
+          label="Nome"
+          labelPlacement="stacked"
+          placeholder="Ex.: CNH Higor"
+          [ngModel]="d.title"
+          (ngModelChange)="setTitle(i, $event)"
+          [clearInput]="true"
+          autocapitalize="words"
+          [helperText]="d.ext ? '.' + d.ext : ''"
+        />
+        @if (drafts().length > 1) {
+          <ion-button slot="end" fill="clear" color="medium" (click)="removeDraft(i)" aria-label="Tirar da lista">
+            <ion-icon slot="icon-only" name="close" />
+          </ion-button>
+        }
+      </ion-item>
+    }
+  </ion-list>
+
+  <ion-list inset>
+    <ion-list-header>Pasta</ion-list-header>
+    <ion-item button (click)="chooseFolder()">
+      @if (folder(); as f) {
+        <span slot="start" class="dot" [style.background]="f.color"></span>
+        <ion-label>{{ f.name }}</ion-label>
+        <ion-note slot="end">Trocar</ion-note>
+      } @else {
+        <ion-icon slot="start" name="folder-outline" color="primary" />
+        <ion-label color="primary">Escolher ou criar pasta</ion-label>
+      }
+    </ion-item>
+  </ion-list>
+
+  <ion-list inset>
+    <ion-list-header>Tags{{ drafts().length > 1 ? ' (para todos)' : '' }}</ion-list-header>
+    <ion-item lines="none">
+      <app-tag-input [(tags)]="tags" [suggestions]="store.allTags()" />
+    </ion-item>
+  </ion-list>
+
+  <p class="ion-padding-horizontal muted hint">
+    Os arquivos vão para <b>MyDocs/{{ folder()?.name ?? '…' }}</b> no seu Google Drive.
+  </p>
+</ion-content>

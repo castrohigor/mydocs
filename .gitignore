@@ -1,0 +1,21 @@
+node_modules/
+www/
+dist/
+.angular/
+out-tsc/
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# Capacitor native build outputs
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/public/
+ios/App/build/
+ios/App/Pods/
+ios/App/App/public/
+ios/DerivedData/

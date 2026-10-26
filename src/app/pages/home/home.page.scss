@@ -1,0 +1,117 @@
+ion-content {
+  --background: var(--wallet-bg);
+}
+
+ion-header[collapse='condense'] ion-toolbar {
+  --background: var(--wallet-bg);
+}
+
+.sync {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+}
+
+.filters {
+  padding: 0 8px;
+}
+
+.scroller {
+  display: flex;
+  overflow-x: auto;
+  padding: 0 8px 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ion-chip {
+    flex-shrink: 0;
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+.stack-section {
+  padding: 8px 16px 4px;
+
+  h2 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 14px 4px 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .count {
+    font-weight: 500;
+    margin-left: 6px;
+  }
+}
+
+.stack {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* O truque da Carteira: cada cartão "invade" o anterior, deixando só o topo à mostra. */
+.stack-item {
+  position: relative;
+  margin-bottom: calc(var(--peek, 64px) - 200px);
+  transition: margin-bottom 0.25s ease, transform 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: pointer;
+
+  &.last {
+    margin-bottom: 0;
+  }
+
+  &:active {
+    transform: translateY(-4px);
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 32px;
+
+  ion-icon {
+    font-size: 56px;
+    color: var(--ion-color-medium);
+  }
+
+  .small {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+}
+
+.bottom-space {
+  height: 96px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  gap: 2px;
+
+  ion-icon {
+    font-size: 22px;
+  }
+}

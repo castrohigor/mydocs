@@ -1,0 +1,63 @@
+ion-content {
+  --background: var(--wallet-bg);
+}
+
+.hero {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+h1 {
+  font-size: 34px;
+  font-weight: 800;
+  margin: 28px 0 8px;
+}
+
+p {
+  line-height: 1.45;
+  margin: 0 0 28px;
+}
+
+.stack {
+  position: relative;
+  height: 170px;
+  margin: 0 auto;
+  width: 250px;
+}
+
+.card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 150px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.c1 { top: 0; background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.c2 { top: 14px; background: linear-gradient(135deg, #fbbf24, #d97706); }
+.c3 {
+  top: 28px;
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: #fff;
+  font-weight: 700;
+  text-align: left;
+  padding: 16px;
+  letter-spacing: 0.06em;
+}
+
+.error {
+  color: var(--ion-color-danger);
+  margin-top: 16px;
+}
+
+.fine {
+  font-size: 13px;
+  margin-top: 24px;
+}
